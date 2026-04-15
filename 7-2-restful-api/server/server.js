@@ -11,22 +11,8 @@ import { Song } from "./models/song.model.js";
 const app = express();
 const PORT = process.env.PORT || 5174;
 
-app.use(cors());              
+app.use(cors());
 app.use(express.json());
-
-await connectDB(process.env.MONGO_URL);
-const mongoose = require("mongoose");
-
-async function connectDB() {
-  try {
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log("Mongo connected");
-  } catch (err) {
-    console.error("Connection error:", err.message);
-  }
-}
-
-connectDB();
 
 // api/songs (Read all songs)
 app.get("/api/songs", async (req, res) => {
@@ -71,6 +57,25 @@ app.put("/api/songs/:id", async (req, res) => {
 });
 
 // /api/songs/:id (Delete song)
+app.delete("/api/songs/:id", async (req, res) => {
+  const deleted = await Song.findByIdAndDelete(req.params.id);
+  if (!deleted) return res.status(404).json({ message: "Song not found" });
+  res.status(204).end();
+});
 
+const start = async () => {
+  try {
+    console.log("MONGO_URL:", process.env.MONGO_URL);
 
-app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
+    await connectDB(process.env.MONGO_URL);
+
+    app.listen(PORT, () =>
+      console.log(`API running on http://localhost:${PORT}`)
+    );
+
+  } catch (err) {
+    console.error("Server failed to start:", err.message);
+  }
+};
+
+start();
