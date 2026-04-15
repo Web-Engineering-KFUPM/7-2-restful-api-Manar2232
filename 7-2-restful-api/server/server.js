@@ -33,6 +33,19 @@ connectDB();
 
 
 // api/songs (Insert song)
+app.post("/api/songs", async (req, res) => {
+  try {
+    const { title = "", artist = "", year } = req.body || {};
+    const created = await Song.create({
+      title: title.trim(),
+      artist: artist.trim(),
+      year
+    });
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ message: err.message || "Failed to create song" });
+  }
+});
 
 // /api/songs/:id (Update song)
 
